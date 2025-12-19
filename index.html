@@ -5,158 +5,146 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>星际时光相册</title>
     <style>
-        /* --- 1. 基础设置：彻底禁止页面滚动 --- */
+        /* --- 全局设置 --- */
         html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden; /* 隐藏滚动条 */
-            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #1B2735 0%, #090A0F 100%);
             font-family: 'Arial', sans-serif;
-            
-            /* 关键：禁止移动端的默认触摸行为（如橡皮筋滚动） */
             touch-action: none; 
-            position: fixed; /* 强制固定，防止iOS回弹 */
+            position: fixed;
         }
 
-        /* 3D 舞台 */
-        #perspective-box {
-            perspective: 1000px; /* 透视深度 */
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* --- 2. 星空背景动画 --- */
+        /* --- 动态星空与星云背景 --- */
         .stars {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            pointer-events: none; /* 让背景不干扰拖拽 */
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; pointer-events: none;
         }
+        /* 添加一个中心星云光晕 */
+        .nebula {
+            position: absolute; top: 50%; left: 50%;
+            width: 600px; height: 600px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(63, 94, 251, 0.2) 0%, rgba(252, 70, 107, 0.0) 70%);
+            filter: blur(50px);
+            z-index: -2;
+            animation: pulse 6s ease-in-out infinite alternate;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.8); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        /* 简单的星星粒子 */
         .stars::after {
-            content: " ";
-            position: absolute;
-            top: 2000px;
-            width: 1px; height: 1px;
-            background: transparent;
+            content: " "; position: absolute; top: 2000px;
+            width: 1px; height: 1px; background: transparent;
             box-shadow: 
                 100px 500px #FFF, 200px 600px #FFF, 300px 300px #FFF, 
                 800px 200px #FFF, 1000px 500px #FFF, 100px 100px #FFF, 
-                500px 500px #FFF, 800px 800px #FFF, 1200px 200px #FFF,
-                550px 150px #FFF, 900px 900px #FFF, 50px 800px #FFF;
+                500px 500px #FFF, 800px 800px #FFF, 1200px 200px #FFF;
             animation: animStar 50s linear infinite;
         }
-        @keyframes animStar {
-            from { transform: translateY(0px); }
-            to { transform: translateY(-2000px); }
+        @keyframes animStar { from {transform: translateY(0px);} to {transform: translateY(-2000px);} }
+
+        /* --- 3D 舞台 --- */
+        #perspective-box {
+            perspective: 1000px;
+            width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
         }
 
-        /* --- 3. 旋转容器 --- */
         #drag-container {
-            position: relative;
-            display: flex;
+            position: relative; display: flex;
             transform-style: preserve-3d;
             transform: rotateX(-10deg);
+            /* 增加整体的上下悬浮动画 */
+            animation: floatObj 6s ease-in-out infinite; 
+        }
+
+        @keyframes floatObj {
+            0%, 100% { margin-top: 0; }
+            50% { margin-top: -20px; }
         }
 
         #spin-container {
             position: relative;
-            width: 120px; 
-            height: 170px; 
+            width: 120px; height: 170px;
             transform-style: preserve-3d;
             animation: spin 30s infinite linear;
         }
 
-        /* 鼠标悬停或手指按住时，暂停自动旋转 */
-        #drag-container:active #spin-container {
-            animation-play-state: paused;
-        }
-
-        /* --- 4. 照片样式 --- */
+        /* --- 照片卡片样式升级 --- */
         #spin-container img {
-            position: absolute;
-            left: 0; top: 0;
+            position: absolute; left: 0; top: 0;
             width: 100%; height: 100%;
             object-fit: cover;
-            border-radius: 8px;
-            box-shadow: 0 0 8px #fff;
-            -webkit-box-reflect: below 10px linear-gradient(transparent, transparent, #0005);
-            border: 2px solid rgba(255,255,255,0.6);
-            cursor: pointer; /* 提示可点击 */
-            
-            /* 防止图片被长按选中或拖拽出鬼影 */
+            border-radius: 10px;
+            /* 玻璃质感边框 */
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            /* 倒影 */
+            -webkit-box-reflect: below 10px linear-gradient(transparent, transparent, #0003);
+            cursor: pointer;
             user-select: none;
-            -webkit-user-drag: none;
+            /* 初始透明度，进场动画用 */
+            opacity: 0.9;
+            transition: box-shadow 0.3s, transform 0.3s;
+            /* 霓虹呼吸灯效果 */
+            animation: neonGlow 3s infinite alternate;
         }
 
-        /* 中心地面文字 */
+        /* 选中/悬停时的高亮 */
+        #spin-container img:hover {
+            box-shadow: 0 0 15px #0ff;
+            border-color: #fff;
+            opacity: 1;
+        }
+
+        @keyframes neonGlow {
+            0% { box-shadow: 0 0 5px rgba(0, 255, 255, 0.3); }
+            100% { box-shadow: 0 0 15px rgba(255, 0, 255, 0.5); }
+        }
+
         #spin-container p {
-            position: absolute;
-            top: 100%; left: 50%;
+            position: absolute; top: 100%; left: 50%;
             transform: translate(-50%, -50%) rotateX(90deg);
-            color: #fff;
-            font-size: 20px;
+            color: #fff; font-size: 20px; letter-spacing: 5px;
             text-shadow: 0 0 10px #0ff;
             pointer-events: none;
         }
 
-        /* 旋转关键帧 */
         @keyframes spin {
             from { transform: rotateY(0deg); }
             to { transform: rotateY(360deg); }
         }
 
-        /* --- 5. 新增：点击放大的遮罩层 (Lightbox) --- */
+        /* --- Lightbox (点击放大) --- */
         #lightbox {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.9); /* 深黑背景 */
-            z-index: 999;
-            display: none; /* 默认隐藏 */
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            transition: opacity 0.3s;
-            backdrop-filter: blur(5px); /* 背景模糊 */
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 1000;
+            display: none; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.3s; backdrop-filter: blur(10px);
         }
-        #lightbox.show {
-            display: flex;
-            opacity: 1;
-        }
+        #lightbox.show { display: flex; opacity: 1; }
         #lightbox img {
-            max-width: 90%;
-            max-height: 80%;
-            border: 3px solid #fff;
-            box-shadow: 0 0 20px rgba(255,255,255,0.5);
-            border-radius: 4px;
-            transform: scale(0.8);
-            transition: transform 0.3s;
+            max-width: 90%; max-height: 85%;
+            border: 2px solid #fff; border-radius: 8px;
+            box-shadow: 0 0 30px rgba(255,255,255,0.2);
+            transform: scale(0.9); transition: transform 0.3s;
         }
-        #lightbox.show img {
-            transform: scale(1);
+        #lightbox.show img { transform: scale(1); }
+        .close-tip {
+            position: absolute; bottom: 30px; color: #666; font-size: 12px; letter-spacing: 2px;
         }
-        /* 关闭提示文字 */
-        #lightbox .close-tip {
-            position: absolute;
-            bottom: 50px;
-            color: #aaa;
-            font-size: 14px;
-            letter-spacing: 2px;
-        }
-
     </style>
 </head>
 <body>
 
     <div class="stars"></div>
-
-    <div id="perspective-box">
+    <div class="nebula"></div> <div id="perspective-box">
         <div id="drag-container">
             <div id="spin-container">
+                
                 <img src="./1.jpg" alt="" onclick="showBig(this)">
                 <img src="./2.jpg" alt="" onclick="showBig(this)">
                 <img src="./3.jpg" alt="" onclick="showBig(this)">
@@ -166,8 +154,8 @@
                 <img src="./7.jpg" alt="" onclick="showBig(this)">
                 <img src="./8.jpg" alt="" onclick="showBig(this)">
                 <img src="./9.jpg" alt="" onclick="showBig(this)">
-                
-                <p>Space Memory</p>
+
+                <p>MEMORY</p>
             </div>
         </div>
     </div>
@@ -178,8 +166,7 @@
     </div>
 
     <script>
-        // --- 参数设置 ---
-        var radius = 240; // 相册半径
+        var radius = 280; // 半径调大一点，因为有9张图
         var imgWidth = 120; 
         var imgHeight = 170; 
 
@@ -188,61 +175,58 @@
         var aEle = [...aImg]; 
         var oDrag = document.getElementById('drag-container');
 
-        // 初始化布局
         oSpin.style.width = imgWidth + "px";
         oSpin.style.height = imgHeight + "px";
 
         function init(delayTime) {
             for (var i = 0; i < aEle.length; i++) {
                 var rotateY = i * (360 / aEle.length);
-                aEle[i].style.transform = "rotateY(" + rotateY + "deg) translateZ(" + radius + "px)";
+                
+                // --- 🌟 动效升级核心：波浪排列 ---
+                // 使用 Math.sin 让图片产生高低错落的 wave 效果
+                // i * 0.8 控制波浪的频率，30 是波浪起伏的高度像素
+                var offsetY = Math.sin(i * 1.5) * 30; 
+
+                // 加上 translateY(offsetY + "px") 实现高低错落
+                aEle[i].style.transform = `rotateY(${rotateY}deg) translateZ(${radius}px) translateY(${offsetY}px)`;
+                
                 aEle[i].style.transition = "transform 1s";
+                // 倒序进场，更有层次感
                 aEle[i].style.transitionDelay = delayTime || (aEle.length - i) / 4 + "s";
             }
         }
-        setTimeout(init, 1000);
 
-        // --- 拖拽交互逻辑 (兼容鼠标与触摸) ---
+        setTimeout(init, 500); // 稍微快一点进场
+
+        // --- 拖拽交互逻辑 (保持稳固版) ---
         var sX, sY, nX, nY, desX = 0, desY = 0, tX = 0, tY = 0;
-        
-        // 标记是否正在拖拽，用于区分“拖拽”还是“点击”
         var isDragging = false; 
 
         document.onpointerdown = function (e) {
             clearInterval(oDrag.timer);
             e = e || window.event;
             var sX = e.clientX, sY = e.clientY;
-            isDragging = false; // 按下时先假设不是拖拽
+            isDragging = false; 
 
             this.onpointermove = function (e) {
                 e = e || window.event;
                 var nX = e.clientX, nY = e.clientY;
-                
                 desX = nX - sX;
                 desY = nY - sY;
+                if (Math.abs(desX) > 2 || Math.abs(desY) > 2) isDragging = true;
                 
-                // 如果移动距离超过 2px，则视为拖拽，禁止触发点击事件
-                if (Math.abs(desX) > 2 || Math.abs(desY) > 2) {
-                    isDragging = true;
-                }
-
                 tX += desX * 0.1;
-                tY += desY * 0.1;
-
+                tY += desY * 0.1; // 允许少量上下翻转
                 applyTransform(oDrag);
                 sX = nX; sY = nY;
             };
 
             this.onpointerup = function (e) {
                 oDrag.timer = setInterval(function () {
-                    desX *= 0.95;
-                    desY *= 0.95;
-                    tX += desX * 0.1;
-                    tY += desY * 0.1;
+                    desX *= 0.95; desY *= 0.95;
+                    tX += desX * 0.1; tY += desY * 0.1;
                     applyTransform(oDrag);
-                    if (Math.abs(desX) < 0.5 && Math.abs(desY) < 0.5) {
-                        clearInterval(oDrag.timer);
-                    }
+                    if (Math.abs(desX) < 0.5 && Math.abs(desY) < 0.5) clearInterval(oDrag.timer);
                 }, 17);
                 this.onpointermove = this.onpointerup = null;
             };
@@ -250,36 +234,25 @@
         };
 
         function applyTransform(obj) {
-            if(tY > 180) tY = 180;
-            if(tY < 0) tY = 0;
+            if(tY > 30) tY = 30;  // 限制上下视角，防止太晕
+            if(tY < -30) tY = -30;
             obj.style.transform = "rotateX(" + (-tY) + "deg) rotateY(" + (tX) + "deg)";
         }
 
-        // --- 放大查看逻辑 ---
+        // --- Lightbox ---
         var lightbox = document.getElementById('lightbox');
         var bigImg = document.getElementById('big-img');
-
         function showBig(imgObj) {
-            // 如果刚刚发生了拖拽，则不执行放大，防止误触
             if (isDragging) return;
-
-            // 暂停背景旋转（可选，看个人喜好）
             oSpin.style.animationPlayState = 'paused';
-
-            // 设置大图路径
             bigImg.src = imgObj.src;
-            
-            // 显示弹窗
             lightbox.style.display = 'flex';
-            // 延时加 class 为了触发 opacity 动画
             setTimeout(() => { lightbox.classList.add('show'); }, 10);
         }
-
         function closeBig() {
             lightbox.classList.remove('show');
             setTimeout(() => { 
                 lightbox.style.display = 'none'; 
-                // 恢复旋转
                 oSpin.style.animationPlayState = 'running';
             }, 300);
         }
