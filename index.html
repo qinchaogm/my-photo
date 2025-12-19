@@ -1,220 +1,244 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>星际时光相册</title>
     <style>
-        /* --- 1. 深邃空间背景设置 --- */
-        body {
+        /* --- 1. 基础设置：彻底禁止页面滚动 --- */
+        html, body {
             margin: 0;
             padding: 0;
-            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            perspective: 1000px;
-            /* 3D 透视深邃感 */
-            font-family: 'Arial', sans-serif;
-        }
-
-        /* 模拟星空背景层 */
-        .stars {
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
-            background: transparent;
-            z-index: -1;
+            overflow: hidden; /* 隐藏滚动条 */
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            font-family: 'Arial', sans-serif;
+            
+            /* 关键：禁止移动端的默认触摸行为（如橡皮筋滚动） */
+            touch-action: none; 
+            position: fixed; /* 强制固定，防止iOS回弹 */
         }
 
-        /* 生成随机星星 (使用 CSS box-shadow 技巧) */
+        /* 3D 舞台 */
+        #perspective-box {
+            perspective: 1000px; /* 透视深度 */
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- 2. 星空背景动画 --- */
+        .stars {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            pointer-events: none; /* 让背景不干扰拖拽 */
+        }
         .stars::after {
             content: " ";
             position: absolute;
             top: 2000px;
-            width: 1px;
-            height: 1px;
+            width: 1px; height: 1px;
             background: transparent;
-            box-shadow:
-                100px 500px #FFF, 200px 600px #FFF, 300px 300px #FFF,
-                800px 200px #FFF, 1000px 500px #FFF, 100px 100px #FFF,
+            box-shadow: 
+                100px 500px #FFF, 200px 600px #FFF, 300px 300px #FFF, 
+                800px 200px #FFF, 1000px 500px #FFF, 100px 100px #FFF, 
                 500px 500px #FFF, 800px 800px #FFF, 1200px 200px #FFF,
                 550px 150px #FFF, 900px 900px #FFF, 50px 800px #FFF;
             animation: animStar 50s linear infinite;
         }
-
         @keyframes animStar {
-            from {
-                transform: translateY(0px);
-            }
-
-            to {
-                transform: translateY(-2000px);
-            }
+            from { transform: translateY(0px); }
+            to { transform: translateY(-2000px); }
         }
 
-        /* --- 2. 3D 相册容器 --- */
+        /* --- 3. 旋转容器 --- */
         #drag-container {
             position: relative;
             display: flex;
-            margin: auto;
             transform-style: preserve-3d;
-            /* 关键：保留3D空间 */
             transform: rotateX(-10deg);
-            /* 稍微俯视一点 */
         }
 
         #spin-container {
             position: relative;
-            display: flex;
-            width: 120px;
-            /* 图片宽度 */
-            height: 170px;
-            /* 图片高度 */
+            width: 120px; 
+            height: 170px; 
             transform-style: preserve-3d;
-            animation: spinRevert 30s infinite linear;
-            /* 自动旋转动画 */
+            animation: spin 30s infinite linear;
         }
 
-        /* --- 3. 照片样式 --- */
+        /* 鼠标悬停或手指按住时，暂停自动旋转 */
+        #drag-container:active #spin-container {
+            animation-play-state: paused;
+        }
+
+        /* --- 4. 照片样式 --- */
         #spin-container img {
             position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
             object-fit: cover;
             border-radius: 8px;
             box-shadow: 0 0 8px #fff;
-            /* 发光边框 */
             -webkit-box-reflect: below 10px linear-gradient(transparent, transparent, #0005);
-            /* 倒影效果 */
-            border: 2px solid rgba(255, 255, 255, 0.6);
+            border: 2px solid rgba(255,255,255,0.6);
+            cursor: pointer; /* 提示可点击 */
+            
+            /* 防止图片被长按选中或拖拽出鬼影 */
+            user-select: none;
+            -webkit-user-drag: none;
         }
 
-        /* --- 4. 中心文字/Logo (可选) --- */
+        /* 中心地面文字 */
         #spin-container p {
             position: absolute;
-            top: 100%;
-            left: 50%;
+            top: 100%; left: 50%;
             transform: translate(-50%, -50%) rotateX(90deg);
             color: #fff;
             font-size: 20px;
             text-shadow: 0 0 10px #0ff;
+            pointer-events: none;
         }
 
-        /* 控制自动旋转的关键帧 */
+        /* 旋转关键帧 */
         @keyframes spin {
-            from {
-                transform: rotateY(0deg);
-            }
-
-            to {
-                transform: rotateY(360deg);
-            }
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
         }
 
-        @keyframes spinRevert {
-            from {
-                transform: rotateY(360deg);
-            }
-
-            to {
-                transform: rotateY(0deg);
-            }
+        /* --- 5. 新增：点击放大的遮罩层 (Lightbox) --- */
+        #lightbox {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); /* 深黑背景 */
+            z-index: 999;
+            display: none; /* 默认隐藏 */
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+            backdrop-filter: blur(5px); /* 背景模糊 */
         }
+        #lightbox.show {
+            display: flex;
+            opacity: 1;
+        }
+        #lightbox img {
+            max-width: 90%;
+            max-height: 80%;
+            border: 3px solid #fff;
+            box-shadow: 0 0 20px rgba(255,255,255,0.5);
+            border-radius: 4px;
+            transform: scale(0.8);
+            transition: transform 0.3s;
+        }
+        #lightbox.show img {
+            transform: scale(1);
+        }
+        /* 关闭提示文字 */
+        #lightbox .close-tip {
+            position: absolute;
+            bottom: 50px;
+            color: #aaa;
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+
     </style>
 </head>
-
 <body>
 
     <div class="stars"></div>
 
-    <div id="drag-container">
-        <div id="spin-container">
-            <img src="./1.jpg" alt="" />
-            <img src="./2.jpg" alt="" />
-            <img src="./3.jpg" alt="" />
-            <img src="./4.jpg" alt="" />
-            <img src="./5.jpg" alt="" />
-            <img src="./6.jpg" alt="" />
-            <img src="./7.jpg" alt="" />
-            <img src="./8.jpg" alt="" />
-            <img src="./9.jpg" alt="" />
+    <div id="perspective-box">
+        <div id="drag-container">
+            <div id="spin-container">
+                <img src="https://picsum.photos/200/300?random=1" alt="" onclick="showBig(this)">
+                <img src="https://picsum.photos/200/300?random=2" alt="" onclick="showBig(this)">
+                <img src="https://picsum.photos/200/300?random=3" alt="" onclick="showBig(this)">
+                <img src="https://picsum.photos/200/300?random=4" alt="" onclick="showBig(this)">
+                <img src="https://picsum.photos/200/300?random=5" alt="" onclick="showBig(this)">
+                <img src="https://picsum.photos/200/300?random=6" alt="" onclick="showBig(this)">
+                
+                <p>Space Memory</p>
+            </div>
         </div>
     </div>
 
+    <div id="lightbox" onclick="closeBig()">
+        <img id="big-img" src="" alt="">
+        <div class="close-tip">点击任意处关闭</div>
+    </div>
+
     <script>
-        // --- 5. JavaScript 逻辑：计算排布与交互 ---
+        // --- 参数设置 ---
+        var radius = 240; // 相册半径
+        var imgWidth = 120; 
+        var imgHeight = 170; 
 
-        var radius = 240; // 相册半径，越大圈越大
-        var autoRotate = true; // 是否自动旋转
-        var rotateSpeed = -60; // 自动旋转速度
-        var imgWidth = 120; // 图片宽
-        var imgHeight = 170; // 图片高
-
-        // 选取元素
         var oSpin = document.getElementById('spin-container');
         var aImg = oSpin.getElementsByTagName('img');
-        var aEle = [...aImg]; // 转为数组
+        var aEle = [...aImg]; 
+        var oDrag = document.getElementById('drag-container');
 
-        // 初始化：设置每张图片的角度
+        // 初始化布局
         oSpin.style.width = imgWidth + "px";
         oSpin.style.height = imgHeight + "px";
 
-        var ground = document.getElementById('ground');
-
         function init(delayTime) {
             for (var i = 0; i < aEle.length; i++) {
-                // 计算每张图片Y轴旋转角度：360度 / 图片数量 * 当前索引
                 var rotateY = i * (360 / aEle.length);
                 aEle[i].style.transform = "rotateY(" + rotateY + "deg) translateZ(" + radius + "px)";
                 aEle[i].style.transition = "transform 1s";
                 aEle[i].style.transitionDelay = delayTime || (aEle.length - i) / 4 + "s";
             }
         }
-
-        // 延迟执行动画，产生“飞入”效果
         setTimeout(init, 1000);
 
-        // --- 交互逻辑 (支持鼠标拖拽和手机触摸) ---
-        var desX = 0, desY = 0, tX = 0, tY = 10;
+        // --- 拖拽交互逻辑 (兼容鼠标与触摸) ---
+        var sX, sY, nX, nY, desX = 0, desY = 0, tX = 0, tY = 0;
+        
+        // 标记是否正在拖拽，用于区分“拖拽”还是“点击”
+        var isDragging = false; 
 
         document.onpointerdown = function (e) {
-            clearInterval(oSpin.timer);
+            clearInterval(oDrag.timer);
             e = e || window.event;
             var sX = e.clientX, sY = e.clientY;
+            isDragging = false; // 按下时先假设不是拖拽
 
             this.onpointermove = function (e) {
                 e = e || window.event;
                 var nX = e.clientX, nY = e.clientY;
-
-                // 计算移动距离
+                
                 desX = nX - sX;
                 desY = nY - sY;
+                
+                // 如果移动距离超过 2px，则视为拖拽，禁止触发点击事件
+                if (Math.abs(desX) > 2 || Math.abs(desY) > 2) {
+                    isDragging = true;
+                }
 
-                // 更新旋转角度
                 tX += desX * 0.1;
                 tY += desY * 0.1;
 
-                applyTransform(oSpin);
+                applyTransform(oDrag);
                 sX = nX; sY = nY;
             };
 
             this.onpointerup = function (e) {
-                oSpin.timer = setInterval(function () {
+                oDrag.timer = setInterval(function () {
                     desX *= 0.95;
                     desY *= 0.95;
                     tX += desX * 0.1;
                     tY += desY * 0.1;
-                    applyTransform(oSpin);
-                    playSpin(false);
+                    applyTransform(oDrag);
                     if (Math.abs(desX) < 0.5 && Math.abs(desY) < 0.5) {
-                        clearInterval(oSpin.timer);
-                        playSpin(true);
+                        clearInterval(oDrag.timer);
                     }
                 }, 17);
                 this.onpointermove = this.onpointerup = null;
@@ -223,17 +247,39 @@
         };
 
         function applyTransform(obj) {
-            // 限制Y轴旋转角度，防止看地板或看天花板太夸张
-            if (tY > 180) tY = 180;
-            if (tY < 0) tY = 0;
-            // 应用旋转
+            if(tY > 180) tY = 180;
+            if(tY < 0) tY = 0;
             obj.style.transform = "rotateX(" + (-tY) + "deg) rotateY(" + (tX) + "deg)";
         }
 
-        function playSpin(yes) {
-            oSpin.style.animationPlayState = (yes ? 'running' : 'paused');
+        // --- 放大查看逻辑 ---
+        var lightbox = document.getElementById('lightbox');
+        var bigImg = document.getElementById('big-img');
+
+        function showBig(imgObj) {
+            // 如果刚刚发生了拖拽，则不执行放大，防止误触
+            if (isDragging) return;
+
+            // 暂停背景旋转（可选，看个人喜好）
+            oSpin.style.animationPlayState = 'paused';
+
+            // 设置大图路径
+            bigImg.src = imgObj.src;
+            
+            // 显示弹窗
+            lightbox.style.display = 'flex';
+            // 延时加 class 为了触发 opacity 动画
+            setTimeout(() => { lightbox.classList.add('show'); }, 10);
+        }
+
+        function closeBig() {
+            lightbox.classList.remove('show');
+            setTimeout(() => { 
+                lightbox.style.display = 'none'; 
+                // 恢复旋转
+                oSpin.style.animationPlayState = 'running';
+            }, 300);
         }
     </script>
 </body>
-
 </html>
