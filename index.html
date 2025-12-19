@@ -9,7 +9,6 @@
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%;
             overflow: hidden;
-            /* 背景稍微调深一点，突出水面 */
             background: radial-gradient(circle at center, #121a24 0%, #06070a 100%);
             font-family: 'Arial', sans-serif;
             touch-action: none; 
@@ -21,7 +20,6 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1; pointer-events: none;
         }
-        /* 星云光晕（稍微减淡，不抢戏） */
         .nebula {
             position: absolute; top: 50%; left: 50%;
             width: 700px; height: 700px;
@@ -34,7 +32,6 @@
             0% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.9); }
             100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); }
         }
-        /* 远景星星 */
         .stars::after {
             content: " "; position: absolute; top: 2000px;
             width: 1px; height: 1px; background: transparent;
@@ -57,94 +54,64 @@
             position: relative; display: flex;
             transform-style: preserve-3d;
             transform: rotateX(-10deg);
-            /* 整体缓慢悬浮 */
-            animation: floatObj 7s ease-in-out infinite; 
-        }
-        @keyframes floatObj {
-            0%, 100% { transform: rotateX(-10deg) translateY(0); }
-            50% { transform: rotateX(-10deg) translateY(-15px); }
+            /* 移除 floatObj 动画，避免和拖拽冲突导致手感奇怪 */
         }
 
-        /* --- ✨ 新增特效层：图片上方的星星闪烁 ✨ --- */
+        /* --- 特效层 (pointer-events: none 确保不阻挡拖拽) --- */
         #sparkles-layer {
-            position: absolute;
-            top: -150px; /* 在图片上方 */
-            left: 50%;
-            width: 600px; height: 200px;
-            transform: translateX(-50%) translateZ(50px); /* 稍微靠前 */
-            /* 使用径向渐变模拟闪烁粒子 */
+            position: absolute; top: -180px; left: 50%;
+            width: 600px; height: 300px;
+            transform: translateX(-50%) translateZ(50px);
             background-image: 
                 radial-gradient(circle at 20% 30%, #fff 1px, transparent 2px),
                 radial-gradient(circle at 80% 70%, #fff 1px, transparent 2px),
-                radial-gradient(circle at 50% 50%, #fff 2px, transparent 3px),
-                radial-gradient(circle at 30% 80%, #cef 1px, transparent 2px),
-                radial-gradient(circle at 70% 20%, #cef 1px, transparent 2px);
-            background-size: 100% 100%;
-            opacity: 0.6;
-            pointer-events: none;
-            animation: twinkle 2s infinite alternate;
+                radial-gradient(circle at 50% 50%, #fff 2px, transparent 3px);
+            background-size: 100% 100%; opacity: 0.6; pointer-events: none;
+            animation: twinkle 3s infinite alternate;
         }
         @keyframes twinkle {
             0% { opacity: 0.3; transform: translateX(-50%) translateZ(50px) scale(0.9); }
             100% { opacity: 0.8; transform: translateX(-50%) translateZ(50px) scale(1.1); }
         }
 
-        /* --- 🌊 新增特效层：底部水面波纹 🌊 --- */
         #water-ground {
-            position: absolute;
-            top: 220px; /* 在图片下方 */
-            left: 50%;
-            width: 1000px; height: 1000px;
-            /* 躺平在地面 */
+            position: absolute; top: 200px; left: 50%;
+            width: 1200px; height: 1200px;
             transform: translate(-50%, -50%) rotateX(90deg);
-            /* 复杂的背景组合模拟水波 */
             background: 
-                linear-gradient(to bottom, transparent 0%, #000 60%), /* 远处变黑 */
-                repeating-radial-gradient(circle at 50% 0%, rgba(255,255,255,0.03) 0, transparent 10px, rgba(255,255,255,0.03) 20px); /* 波纹纹理 */
-            background-size: 100% 100%, 100% 100px; /* 拉伸纹理 */
-            opacity: 0.4;
-            pointer-events: none;
-            animation: waterFlow 10s linear infinite;
+                linear-gradient(to bottom, transparent 0%, #000 80%),
+                repeating-radial-gradient(circle at 50% 0%, rgba(255,255,255,0.04) 0, transparent 15px, rgba(255,255,255,0.02) 30px);
+            opacity: 0.5; pointer-events: none;
+            animation: waterFlow 12s linear infinite;
         }
         @keyframes waterFlow {
             from { background-position: center, center 0px; }
             to { background-position: center, center 200px; }
         }
 
-
+        /* --- 相册容器 --- */
         #spin-container {
-            position: relative;
-            width: 120px; height: 170px;
+            position: relative; width: 120px; height: 170px;
             transform-style: preserve-3d;
             animation: spin 30s infinite linear;
         }
 
-        /* --- 🖼️ 照片样式 (改回 V2 经典白边) --- */
+        /* --- 照片样式 (经典白边) --- */
         #spin-container img {
             position: absolute; left: 0; top: 0;
             width: 100%; height: 100%;
             object-fit: cover;
             border-radius: 10px;
-            
-            /* ✅ 改回：经典白色发光边框 */
             box-shadow: 0 0 10px #fff; 
             border: 2px solid rgba(255,255,255,0.7);
-
-            /* 倒影（配合水面层） */
             -webkit-box-reflect: below 8px linear-gradient(transparent 40%, rgba(0,0,0,0.4));
-            cursor: pointer; user-select: none;
-            opacity: 0.95;
+            cursor: pointer; user-select: none; opacity: 0.95;
             transition: all 0.3s;
         }
-
-        /* 选中/悬停时的高亮 */
         #spin-container img:hover {
-            box-shadow: 0 0 20px #fff;
-            border-color: #fff;
-            transform: scale(1.05) !important; /* 稍微放大 */
+            box-shadow: 0 0 20px #fff; border-color: #fff; transform: scale(1.05);
         }
 
-        /* 中心地面文字 */
         #spin-container p {
             position: absolute; top: 100%; left: 50%;
             transform: translate(-50%, -50%) rotateX(90deg);
@@ -157,7 +124,7 @@
             to { transform: rotateY(360deg); }
         }
 
-        /* --- Lightbox (点击放大) --- */
+        /* --- Lightbox --- */
         #lightbox {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.92); z-index: 1000;
@@ -178,17 +145,12 @@
     </style>
 </head>
 <body>
-
     <div class="stars"></div>
     <div class="nebula"></div>
-
     <div id="perspective-box">
         <div id="drag-container">
-            
             <div id="sparkles-layer"></div>
-            
             <div id="water-ground"></div>
-
             <div id="spin-container">
                 <img src="./1.jpg" alt="" onclick="showBig(this)">
                 <img src="./2.jpg" alt="" onclick="showBig(this)">
@@ -199,15 +161,13 @@
                 <img src="./7.jpg" alt="" onclick="showBig(this)">
                 <img src="./8.jpg" alt="" onclick="showBig(this)">
                 <img src="./9.jpg" alt="" onclick="showBig(this)">
-
-                <p>STARLIGHT MEMORY</p>
+                <p>Roche limit</p>
             </div>
         </div>
     </div>
-
     <div id="lightbox" onclick="closeBig()">
         <img id="big-img" src="" alt="">
-        <div class="close-tip">TAP TO CLOSE</div>
+        <div class="close-tip">点击任意位置关闭>diand
     </div>
 
     <script>
@@ -226,17 +186,17 @@
         function init(delayTime) {
             for (var i = 0; i < aEle.length; i++) {
                 var rotateY = i * (360 / aEle.length);
-                // 保持波浪排列，但幅度稍微减小，看起来更优雅
-                var offsetY = Math.sin(i * 1.5) * 25; 
+                // 恢复波浪效果
+                var offsetY = Math.sin(i * 1.5) * 20; 
                 aEle[i].style.transform = `rotateY(${rotateY}deg) translateZ(${radius}px) translateY(${offsetY}px)`;
-                aEle[i].style.transition = "transform 1s, opacity 1s";
+                aEle[i].style.transition = "transform 1s";
                 aEle[i].style.transitionDelay = delayTime || (aEle.length - i) / 4 + "s";
             }
         }
         setTimeout(init, 500);
 
-        // --- 拖拽交互逻辑 (微调视角限制) ---
-        var sX, sY, nX, nY, desX = 0, desY = 0, tX = 0, tY = 15; // 初始带一点俯角
+        // --- 核心修复：拖拽逻辑 ---
+        var sX, sY, nX, nY, desX = 0, desY = 0, tX = 0, tY = 10;
         var isDragging = false; 
 
         document.onpointerdown = function (e) {
@@ -271,9 +231,12 @@
         };
 
         function applyTransform(obj) {
-            // 限制视角，确保水面穿帮不用太严重
-            if(tY > 45) tY = 45;
-            if(tY < 0) tY = 0; // 不允许仰视，只能平视或俯视水面
+            // --- 修复点：放宽角度限制 ---
+            // 之前的版本限制在 0 到 45，现在恢复到 0 到 180 (允许翻转)
+            // 这样拖拽手感就回来了
+            if(tY > 180) tY = 180;
+            if(tY < 0) tY = 0; 
+            
             obj.style.transform = "rotateX(" + (-tY) + "deg) rotateY(" + (tX) + "deg)";
         }
 
@@ -282,10 +245,7 @@
         var bigImg = document.getElementById('big-img');
         function showBig(imgObj) {
             if (isDragging) return;
-            // 暂停旋转和悬浮动画，让画面静止
             oSpin.style.animationPlayState = 'paused';
-            oDrag.style.animationPlayState = 'paused'; 
-
             bigImg.src = imgObj.src;
             lightbox.style.display = 'flex';
             setTimeout(() => { lightbox.classList.add('show'); }, 10);
@@ -294,9 +254,7 @@
             lightbox.classList.remove('show');
             setTimeout(() => { 
                 lightbox.style.display = 'none'; 
-                // 恢复动画
                 oSpin.style.animationPlayState = 'running';
-                oDrag.style.animationPlayState = 'running';
             }, 300);
         }
     </script>
