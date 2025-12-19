@@ -9,33 +9,32 @@
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%;
             overflow: hidden;
-            background: radial-gradient(circle at center, #1B2735 0%, #090A0F 100%);
+            /* 背景稍微调深一点，突出水面 */
+            background: radial-gradient(circle at center, #121a24 0%, #06070a 100%);
             font-family: 'Arial', sans-serif;
             touch-action: none; 
             position: fixed;
         }
 
-        /* --- 动态星空与星云背景 --- */
+        /* --- 背景层 --- */
         .stars {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1; pointer-events: none;
         }
-        /* 添加一个中心星云光晕 */
+        /* 星云光晕（稍微减淡，不抢戏） */
         .nebula {
             position: absolute; top: 50%; left: 50%;
-            width: 600px; height: 600px;
+            width: 700px; height: 700px;
             transform: translate(-50%, -50%);
-            background: radial-gradient(circle, rgba(63, 94, 251, 0.2) 0%, rgba(252, 70, 107, 0.0) 70%);
-            filter: blur(50px);
-            z-index: -2;
-            animation: pulse 6s ease-in-out infinite alternate;
+            background: radial-gradient(circle, rgba(63, 94, 251, 0.15) 0%, rgba(252, 70, 107, 0.0) 60%);
+            filter: blur(60px); z-index: -2;
+            animation: pulse 8s ease-in-out infinite alternate;
         }
         @keyframes pulse {
-            0% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.8); }
-            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            0% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.9); }
+            100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); }
         }
-
-        /* 简单的星星粒子 */
+        /* 远景星星 */
         .stars::after {
             content: " "; position: absolute; top: 2000px;
             width: 1px; height: 1px; background: transparent;
@@ -43,7 +42,7 @@
                 100px 500px #FFF, 200px 600px #FFF, 300px 300px #FFF, 
                 800px 200px #FFF, 1000px 500px #FFF, 100px 100px #FFF, 
                 500px 500px #FFF, 800px 800px #FFF, 1200px 200px #FFF;
-            animation: animStar 50s linear infinite;
+            animation: animStar 60s linear infinite;
         }
         @keyframes animStar { from {transform: translateY(0px);} to {transform: translateY(-2000px);} }
 
@@ -58,14 +57,60 @@
             position: relative; display: flex;
             transform-style: preserve-3d;
             transform: rotateX(-10deg);
-            /* 增加整体的上下悬浮动画 */
-            animation: floatObj 6s ease-in-out infinite; 
+            /* 整体缓慢悬浮 */
+            animation: floatObj 7s ease-in-out infinite; 
+        }
+        @keyframes floatObj {
+            0%, 100% { transform: rotateX(-10deg) translateY(0); }
+            50% { transform: rotateX(-10deg) translateY(-15px); }
         }
 
-        @keyframes floatObj {
-            0%, 100% { margin-top: 0; }
-            50% { margin-top: -20px; }
+        /* --- ✨ 新增特效层：图片上方的星星闪烁 ✨ --- */
+        #sparkles-layer {
+            position: absolute;
+            top: -150px; /* 在图片上方 */
+            left: 50%;
+            width: 600px; height: 200px;
+            transform: translateX(-50%) translateZ(50px); /* 稍微靠前 */
+            /* 使用径向渐变模拟闪烁粒子 */
+            background-image: 
+                radial-gradient(circle at 20% 30%, #fff 1px, transparent 2px),
+                radial-gradient(circle at 80% 70%, #fff 1px, transparent 2px),
+                radial-gradient(circle at 50% 50%, #fff 2px, transparent 3px),
+                radial-gradient(circle at 30% 80%, #cef 1px, transparent 2px),
+                radial-gradient(circle at 70% 20%, #cef 1px, transparent 2px);
+            background-size: 100% 100%;
+            opacity: 0.6;
+            pointer-events: none;
+            animation: twinkle 2s infinite alternate;
         }
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: translateX(-50%) translateZ(50px) scale(0.9); }
+            100% { opacity: 0.8; transform: translateX(-50%) translateZ(50px) scale(1.1); }
+        }
+
+        /* --- 🌊 新增特效层：底部水面波纹 🌊 --- */
+        #water-ground {
+            position: absolute;
+            top: 220px; /* 在图片下方 */
+            left: 50%;
+            width: 1000px; height: 1000px;
+            /* 躺平在地面 */
+            transform: translate(-50%, -50%) rotateX(90deg);
+            /* 复杂的背景组合模拟水波 */
+            background: 
+                linear-gradient(to bottom, transparent 0%, #000 60%), /* 远处变黑 */
+                repeating-radial-gradient(circle at 50% 0%, rgba(255,255,255,0.03) 0, transparent 10px, rgba(255,255,255,0.03) 20px); /* 波纹纹理 */
+            background-size: 100% 100%, 100% 100px; /* 拉伸纹理 */
+            opacity: 0.4;
+            pointer-events: none;
+            animation: waterFlow 10s linear infinite;
+        }
+        @keyframes waterFlow {
+            from { background-position: center, center 0px; }
+            to { background-position: center, center 200px; }
+        }
+
 
         #spin-container {
             position: relative;
@@ -74,42 +119,36 @@
             animation: spin 30s infinite linear;
         }
 
-        /* --- 照片卡片样式升级 --- */
+        /* --- 🖼️ 照片样式 (改回 V2 经典白边) --- */
         #spin-container img {
             position: absolute; left: 0; top: 0;
             width: 100%; height: 100%;
             object-fit: cover;
             border-radius: 10px;
-            /* 玻璃质感边框 */
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            /* 倒影 */
-            -webkit-box-reflect: below 10px linear-gradient(transparent, transparent, #0003);
-            cursor: pointer;
-            user-select: none;
-            /* 初始透明度，进场动画用 */
-            opacity: 0.9;
-            transition: box-shadow 0.3s, transform 0.3s;
-            /* 霓虹呼吸灯效果 */
-            animation: neonGlow 3s infinite alternate;
+            
+            /* ✅ 改回：经典白色发光边框 */
+            box-shadow: 0 0 10px #fff; 
+            border: 2px solid rgba(255,255,255,0.7);
+
+            /* 倒影（配合水面层） */
+            -webkit-box-reflect: below 8px linear-gradient(transparent 40%, rgba(0,0,0,0.4));
+            cursor: pointer; user-select: none;
+            opacity: 0.95;
+            transition: all 0.3s;
         }
 
         /* 选中/悬停时的高亮 */
         #spin-container img:hover {
-            box-shadow: 0 0 15px #0ff;
+            box-shadow: 0 0 20px #fff;
             border-color: #fff;
-            opacity: 1;
+            transform: scale(1.05) !important; /* 稍微放大 */
         }
 
-        @keyframes neonGlow {
-            0% { box-shadow: 0 0 5px rgba(0, 255, 255, 0.3); }
-            100% { box-shadow: 0 0 15px rgba(255, 0, 255, 0.5); }
-        }
-
+        /* 中心地面文字 */
         #spin-container p {
             position: absolute; top: 100%; left: 50%;
             transform: translate(-50%, -50%) rotateX(90deg);
-            color: #fff; font-size: 20px; letter-spacing: 5px;
-            text-shadow: 0 0 10px #0ff;
+            color: rgba(255,255,255,0.5); font-size: 16px; letter-spacing: 5px;
             pointer-events: none;
         }
 
@@ -121,30 +160,36 @@
         /* --- Lightbox (点击放大) --- */
         #lightbox {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 1000;
+            background: rgba(0,0,0,0.92); z-index: 1000;
             display: none; justify-content: center; align-items: center;
-            opacity: 0; transition: opacity 0.3s; backdrop-filter: blur(10px);
+            opacity: 0; transition: opacity 0.3s; backdrop-filter: blur(15px);
         }
         #lightbox.show { display: flex; opacity: 1; }
         #lightbox img {
             max-width: 90%; max-height: 85%;
-            border: 2px solid #fff; border-radius: 8px;
-            box-shadow: 0 0 30px rgba(255,255,255,0.2);
-            transform: scale(0.9); transition: transform 0.3s;
+            border: 3px solid #fff; border-radius: 8px;
+            box-shadow: 0 0 30px rgba(255,255,255,0.3);
+            transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         #lightbox.show img { transform: scale(1); }
         .close-tip {
-            position: absolute; bottom: 30px; color: #666; font-size: 12px; letter-spacing: 2px;
+            position: absolute; bottom: 30px; color: #888; font-size: 12px; letter-spacing: 3px;
         }
     </style>
 </head>
 <body>
 
     <div class="stars"></div>
-    <div class="nebula"></div> <div id="perspective-box">
+    <div class="nebula"></div>
+
+    <div id="perspective-box">
         <div id="drag-container">
+            
+            <div id="sparkles-layer"></div>
+            
+            <div id="water-ground"></div>
+
             <div id="spin-container">
-                
                 <img src="./1.jpg" alt="" onclick="showBig(this)">
                 <img src="./2.jpg" alt="" onclick="showBig(this)">
                 <img src="./3.jpg" alt="" onclick="showBig(this)">
@@ -155,18 +200,18 @@
                 <img src="./8.jpg" alt="" onclick="showBig(this)">
                 <img src="./9.jpg" alt="" onclick="showBig(this)">
 
-                <p>MEMORY</p>
+                <p>STARLIGHT MEMORY</p>
             </div>
         </div>
     </div>
 
     <div id="lightbox" onclick="closeBig()">
         <img id="big-img" src="" alt="">
-        <div class="close-tip">点击任意处关闭</div>
+        <div class="close-tip">TAP TO CLOSE</div>
     </div>
 
     <script>
-        var radius = 280; // 半径调大一点，因为有9张图
+        var radius = 280; 
         var imgWidth = 120; 
         var imgHeight = 170; 
 
@@ -181,25 +226,17 @@
         function init(delayTime) {
             for (var i = 0; i < aEle.length; i++) {
                 var rotateY = i * (360 / aEle.length);
-                
-                // --- 🌟 动效升级核心：波浪排列 ---
-                // 使用 Math.sin 让图片产生高低错落的 wave 效果
-                // i * 0.8 控制波浪的频率，30 是波浪起伏的高度像素
-                var offsetY = Math.sin(i * 1.5) * 30; 
-
-                // 加上 translateY(offsetY + "px") 实现高低错落
+                // 保持波浪排列，但幅度稍微减小，看起来更优雅
+                var offsetY = Math.sin(i * 1.5) * 25; 
                 aEle[i].style.transform = `rotateY(${rotateY}deg) translateZ(${radius}px) translateY(${offsetY}px)`;
-                
-                aEle[i].style.transition = "transform 1s";
-                // 倒序进场，更有层次感
+                aEle[i].style.transition = "transform 1s, opacity 1s";
                 aEle[i].style.transitionDelay = delayTime || (aEle.length - i) / 4 + "s";
             }
         }
+        setTimeout(init, 500);
 
-        setTimeout(init, 500); // 稍微快一点进场
-
-        // --- 拖拽交互逻辑 (保持稳固版) ---
-        var sX, sY, nX, nY, desX = 0, desY = 0, tX = 0, tY = 0;
+        // --- 拖拽交互逻辑 (微调视角限制) ---
+        var sX, sY, nX, nY, desX = 0, desY = 0, tX = 0, tY = 15; // 初始带一点俯角
         var isDragging = false; 
 
         document.onpointerdown = function (e) {
@@ -216,7 +253,7 @@
                 if (Math.abs(desX) > 2 || Math.abs(desY) > 2) isDragging = true;
                 
                 tX += desX * 0.1;
-                tY += desY * 0.1; // 允许少量上下翻转
+                tY += desY * 0.1;
                 applyTransform(oDrag);
                 sX = nX; sY = nY;
             };
@@ -234,8 +271,9 @@
         };
 
         function applyTransform(obj) {
-            if(tY > 30) tY = 30;  // 限制上下视角，防止太晕
-            if(tY < -30) tY = -30;
+            // 限制视角，确保水面穿帮不用太严重
+            if(tY > 45) tY = 45;
+            if(tY < 0) tY = 0; // 不允许仰视，只能平视或俯视水面
             obj.style.transform = "rotateX(" + (-tY) + "deg) rotateY(" + (tX) + "deg)";
         }
 
@@ -244,7 +282,10 @@
         var bigImg = document.getElementById('big-img');
         function showBig(imgObj) {
             if (isDragging) return;
+            // 暂停旋转和悬浮动画，让画面静止
             oSpin.style.animationPlayState = 'paused';
+            oDrag.style.animationPlayState = 'paused'; 
+
             bigImg.src = imgObj.src;
             lightbox.style.display = 'flex';
             setTimeout(() => { lightbox.classList.add('show'); }, 10);
@@ -253,7 +294,9 @@
             lightbox.classList.remove('show');
             setTimeout(() => { 
                 lightbox.style.display = 'none'; 
+                // 恢复动画
                 oSpin.style.animationPlayState = 'running';
+                oDrag.style.animationPlayState = 'running';
             }, 300);
         }
     </script>
