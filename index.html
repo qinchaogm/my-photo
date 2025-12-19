@@ -9,39 +9,45 @@
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%;
             overflow: hidden;
-            /* 深海蓝青色渐变背景 */
             background: linear-gradient(to bottom, #005c97, #002f4b, #000428);
             font-family: 'Arial', sans-serif;
             touch-action: none; 
             position: fixed;
         }
 
-        /* --- 1. 上升气泡层 (替代原来的星星) --- */
+        /* --- 1. 上升气泡层 (数量增加版) --- */
         .bubbles {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1; pointer-events: none;
         }
         .bubbles::after {
             content: " "; position: absolute; 
-            /* 气泡从底部开始 */
-            top: 100%; 
-            width: 10px; height: 10px; 
+            top: 100%; /* 从底部开始 */
+            width: 8px; height: 8px; /* 稍微调小一点基础尺寸 */
             background: transparent;
-            border-radius: 50%; /* 圆形气泡 */
-            /* 使用半透明白色/青色阴影模拟气泡 */
+            border-radius: 50%;
+            /* 增加了很多气泡的坐标点 */
             box-shadow: 
                 100px -500px rgba(255,255,255,0.3), 
                 300px -800px rgba(200,255,255,0.4), 
                 500px -200px rgba(255,255,255,0.3), 
                 800px -600px rgba(200,255,255,0.5), 
                 1000px -900px rgba(255,255,255,0.3),
-                200px -1200px rgba(200,255,255,0.4);
-            /* 气泡缓慢上升动画 */
-            animation: bubbleUp 30s linear infinite;
+                200px -1200px rgba(200,255,255,0.4),
+                /* 新增的密集气泡 */
+                150px -300px rgba(255,255,255,0.2),
+                400px -1000px rgba(200,255,255,0.3),
+                600px -400px rgba(255,255,255,0.25),
+                900px -700px rgba(200,255,255,0.35),
+                1100px -1100px rgba(255,255,255,0.2),
+                50px -1300px rgba(200,255,255,0.3),
+                700px -100px rgba(255,255,255,0.2),
+                1200px -500px rgba(200,255,255,0.4);
+            animation: bubbleUp 35s linear infinite; /* 稍微减慢速度 */
         }
         @keyframes bubbleUp {
-            from { transform: translateY(0) scale(0.8); opacity: 1; }
-            to { transform: translateY(-2000px) scale(1.2); opacity: 0; }
+            from { transform: translateY(0) scale(0.5); opacity: 1; }
+            to { transform: translateY(-2000px) scale(1.5); opacity: 0; }
         }
 
         /* --- 2. 水下光柱 (丁达尔效应) --- */
@@ -49,7 +55,6 @@
             position: absolute; top: -20%; left: 50%;
             width: 100%; height: 100%;
             transform: translateX(-50%);
-            /* 径向渐变模拟从上方射入的光 */
             background: radial-gradient(ellipse at top, rgba(255, 255, 255, 0.3) 0%, transparent 60%);
             filter: blur(80px); z-index: -2;
             pointer-events: none;
@@ -60,7 +65,6 @@
             perspective: 1000px;
             width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: center;
-            /* 稍微增加一点水下蓝色滤镜 */
             box-shadow: inset 0 0 200px rgba(0, 100, 255, 0.2);
         }
 
@@ -70,35 +74,17 @@
             transform: rotateX(-10deg);
         }
 
-        /* --- 3. 顶部水面波光 (替代星星闪烁) --- */
-        #surface-shimmer {
-            position: absolute; top: -200px; left: 50%;
-            width: 800px; height: 400px;
-            transform: translateX(-50%) rotateX(90deg);
-            /* 模拟水面焦散光纹 */
-            background-image: 
-                repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0, transparent 20px, rgba(200,255,255,0.05) 40px),
-                repeating-radial-gradient(circle at 60% 40%, rgba(255,255,255,0.1) 0, transparent 30px, rgba(200,255,255,0.05) 60px);
-            background-size: 200% 200%;
-            opacity: 0.6; pointer-events: none;
-            animation: shimmerWater 8s ease-in-out infinite alternate;
-        }
-        @keyframes shimmerWater {
-            0% { opacity: 0.4; background-position: 0% 0%; transform: translateX(-50%) rotateX(90deg) scale(1); }
-            100% { opacity: 0.7; background-position: 100% 50%; transform: translateX(-50%) rotateX(90deg) scale(1.1); }
-        }
+        /* (已移除顶部水面波光层 #surface-shimmer) */
 
-        /* --- 4. 底部沙地光影 (替代水面) --- */
+        /* --- 3. 底部沙地光影 --- */
         #sand-floor {
             position: absolute; top: 250px; left: 50%;
             width: 1500px; height: 1500px;
             transform: translate(-50%, -50%) rotateX(90deg);
-            /* 沙地颜色 + 光影斑驳 */
             background: 
-                linear-gradient(to bottom, transparent 0%, #001529 90%), /* 远处变暗 */
+                linear-gradient(to bottom, transparent 0%, #001529 90%),
                 repeating-radial-gradient(circle at 50% 0%, rgba(255, 248, 220, 0.08) 0, transparent 25px, rgba(173, 216, 230, 0.05) 50px);
             opacity: 0.6; pointer-events: none;
-            /* 缓慢的光影移动 */
             animation: sandLightMove 20s linear infinite alternate;
         }
         @keyframes sandLightMove {
@@ -113,16 +99,15 @@
             animation: spin 30s infinite linear;
         }
 
-        /* --- 照片样式 (带水光感的边框) --- */
+        /* --- 照片样式 (保持不变：带水光感的边框) --- */
         #spin-container img {
             position: absolute; left: 0; top: 0;
             width: 100%; height: 100%;
             object-fit: cover;
             border-radius: 10px;
-            /* 边框带一点青色水光 */
+            /* 保持 V5.0 的边框样式 */
             box-shadow: 0 0 15px rgba(200, 255, 255, 0.6); 
             border: 2px solid rgba(220, 255, 255, 0.8);
-            /* 倒影 */
             -webkit-box-reflect: below 8px linear-gradient(transparent 50%, rgba(0,40,80,0.4));
             cursor: pointer; user-select: none; opacity: 0.95;
             transition: all 0.3s;
@@ -146,13 +131,14 @@
         /* --- Lightbox (点击放大) --- */
         #lightbox {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,10,30,0.95); z-index: 1000; /* 背景更深蓝 */
+            background: rgba(0,10,30,0.95); z-index: 1000;
             display: none; justify-content: center; align-items: center;
             opacity: 0; transition: opacity 0.3s; backdrop-filter: blur(15px);
         }
         #lightbox.show { display: flex; opacity: 1; }
         #lightbox img {
             max-width: 90%; max-height: 85%;
+            /* 放大时的边框也保持水光感 */
             border: 3px solid rgba(220, 255, 255, 0.9); border-radius: 8px;
             box-shadow: 0 0 40px rgba(100, 200, 255, 0.4);
             transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -169,7 +155,6 @@
 
     <div id="perspective-box">
         <div id="drag-container">
-            <div id="surface-shimmer"></div>
             <div id="sand-floor"></div>
 
             <div id="spin-container">
@@ -193,7 +178,7 @@
     </div>
 
     <script>
-        // --- JS 逻辑保持 V4.1 版本不变 (保留丝滑拖拽) ---
+        // --- JS 逻辑保持不变 ---
         var radius = 280; 
         var imgWidth = 120; 
         var imgHeight = 170; 
@@ -226,54 +211,4 @@
             var sX = e.clientX, sY = e.clientY;
             isDragging = false; 
 
-            this.onpointermove = function (e) {
-                e = e || window.event;
-                var nX = e.clientX, nY = e.clientY;
-                desX = nX - sX;
-                desY = nY - sY;
-                if (Math.abs(desX) > 2 || Math.abs(desY) > 2) isDragging = true;
-                
-                tX += desX * 0.1;
-                tY += desY * 0.1;
-                applyTransform(oDrag);
-                sX = nX; sY = nY;
-            };
-
-            this.onpointerup = function (e) {
-                oDrag.timer = setInterval(function () {
-                    desX *= 0.95; desY *= 0.95;
-                    tX += desX * 0.1; tY += desY * 0.1;
-                    applyTransform(oDrag);
-                    if (Math.abs(desX) < 0.5 && Math.abs(desY) < 0.5) clearInterval(oDrag.timer);
-                }, 17);
-                this.onpointermove = this.onpointerup = null;
-            };
-            return false;
-        };
-
-        function applyTransform(obj) {
-            // 保持 V4.1 的自由角度
-            if(tY > 180) tY = 180;
-            if(tY < 0) tY = 0; 
-            obj.style.transform = "rotateX(" + (-tY) + "deg) rotateY(" + (tX) + "deg)";
-        }
-
-        var lightbox = document.getElementById('lightbox');
-        var bigImg = document.getElementById('big-img');
-        function showBig(imgObj) {
-            if (isDragging) return;
-            oSpin.style.animationPlayState = 'paused';
-            bigImg.src = imgObj.src;
-            lightbox.style.display = 'flex';
-            setTimeout(() => { lightbox.classList.add('show'); }, 10);
-        }
-        function closeBig() {
-            lightbox.classList.remove('show');
-            setTimeout(() => { 
-                lightbox.style.display = 'none'; 
-                oSpin.style.animationPlayState = 'running';
-            }, 300);
-        }
-    </script>
-</body>
-</html>
+            this.onpointermove =
